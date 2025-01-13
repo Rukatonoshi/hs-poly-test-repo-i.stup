@@ -25,19 +25,16 @@ jobs:
          key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
          restore-keys: |
            ${{ runner.os }}-stack-global-
-
      - name: Prepare environment
        run: |
          mkdir -p /root/.stack
-         cp -r $GITHUB_WORKSPACE /root/gh-ci-tests
-
+         cp -r $GITHUB_WORKSPACE /root/ci-tests
      - name: Build packages
        if: ${{ steps.cache-stack-deps.outputs.cache-hit != 'true' }}
        run: |
-         cd /root/master
+         cd /root/ci-tests
          stack --stack-root /root/.stack --install-ghc test -j$(nproc) --no-run-tests
-
      - name: Run Stack tests
        run: |
-         cd /root/master
-         stack --stack-root /root/.stack test 
+         cd /root/ci-tests
+         stack --stack-root /root/.stack test
