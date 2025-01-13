@@ -1,0 +1,43 @@
+name: Haskell Stack Tests
+
+on:
+  - push
+  - pull_request
+permissions:
+  checks: write
+  actions: read
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    container: 
+      image: haskell
+      options: --user root
+
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v4
+
+     - uses: actions/cache@v4
+       name: Cache Stack dependencies
+       id: cache-stack-deps
+       with:
+         path: /root/.stack
+         key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+         restore-keys: |
+           ${{ runner.os }}-stack-global-
+
+     - name: Prepare environment
+       run: |
+         mkdir -p /root/.stack
+         cp -r $GITHUB_WORKSPACE /root/gh-ci-tests
+
+     - name: Build packages
+       if: ${{ steps.cache-stack-deps.outputs.cache-hit != 'true' }}
+       run: |
+         cd /root/master
+         stack --stack-root /root/.stack --install-ghc test -j$(nproc) --no-run-tests
+
+     - name: Run Stack tests
+       run: |
+         cd /root/master
+         stack --stack-root /root/.stack test 
