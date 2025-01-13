@@ -29,15 +29,15 @@ jobs:
      - name: Prepare environment
        run: |
          mkdir -p /root/.stack
-         cp -r $GITHUB_WORKSPACE /root/gh-ci-tests
+         cp -r $GITHUB_WORKSPACE /root/ci-tests
 
      - name: Build packages
        if: ${{ steps.cache-stack-deps.outputs.cache-hit != 'true' }}
        run: |
-         cd /root/master
+         cd /root/ci-tests
          stack --stack-root /root/.stack --install-ghc test -j$(nproc) --no-run-tests
 
      - name: Run Stack tests
        run: |
-         cd /root/master
+         cd /root/ci-tests
          stack --stack-root /root/.stack test 
